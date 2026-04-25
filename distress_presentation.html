@@ -1331,6 +1331,7 @@ nav .nav-links a:hover { color: var(--text); }
       <li><a href="#simulator">Physio Sim</a></li>
       <li><a href="#geo-simulator">Safety Sim</a></li>
       <li><a href="#audio-section">Audio</a></li>
+      <li><a href="#unified-section">Unified</a></li>
       <li><a href="#profiles">Profiles</a></li>
     </ul>
   </div>
@@ -1795,6 +1796,108 @@ nav .nav-links a:hover { color: var(--text); }
 
       <!-- Result -->
       <div class="geo-result" id="audio-result">
+        <!-- populated by JS -->
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ UNIFIED PIPELINE ═══════════════ -->
+<section id="unified-section">
+  <div class="container">
+    <div class="section-label" style="color:#fbbf24;">Unified Pipeline</div>
+    <div class="section-title">Single Output, Linear Flow</div>
+    <div class="section-sub">Motion → Physiological → Geospatial → Audio. One decision, five context levels, three states. Manual SOS trigger overrides everything with the highest weight.</div>
+
+    <!-- Flow diagram -->
+    <div class="layer-overview fade-in" style="margin-bottom:24px;">
+      <div class="layer-pill" style="border-color:#fbbf24;">
+        <div class="layer-num" style="background:rgba(251,191,36,0.15);color:#fbbf24;">★</div>
+        <div class="layer-info"><div class="li-name">Manual Trigger</div><div class="li-sub">Highest weight · bypasses gates</div></div>
+      </div>
+      <div class="layer-pill">
+        <div class="layer-num" style="background:rgba(56,189,248,0.15);color:var(--accent-b);">1</div>
+        <div class="layer-info"><div class="li-name">Motion + Fall</div><div class="li-sub">Can flag alone</div></div>
+      </div>
+      <div class="layer-pill">
+        <div class="layer-num" style="background:rgba(74,222,128,0.15);color:var(--accent-g);">2</div>
+        <div class="layer-info"><div class="li-name">Physiological</div><div class="li-sub">Primary trigger</div></div>
+      </div>
+      <div class="layer-pill">
+        <div class="layer-num" style="background:rgba(167,139,250,0.15);color:var(--geo-accent);">3</div>
+        <div class="layer-info"><div class="li-name">Geospatial</div><div class="li-sub">Amplifier only</div></div>
+      </div>
+      <div class="layer-pill" style="border-color:var(--audio-accent);">
+        <div class="layer-num" style="background:rgba(244,114,182,0.15);color:var(--audio-accent);">4</div>
+        <div class="layer-info"><div class="li-name">Audio</div><div class="li-sub">Gated · corroborator</div></div>
+      </div>
+    </div>
+
+    <!-- Simulator layout -->
+    <div class="geo-layout">
+      <!-- Controls -->
+      <div class="geo-controls">
+        <h3 style="color:#fbbf24;">⚡ Unified Pipeline Controls</h3>
+
+        <!-- Manual trigger -->
+        <div style="margin-bottom:16px;padding:12px;border:2px solid #fbbf24;border-radius:8px;background:rgba(251,191,36,0.08);">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">Manual SOS</div>
+          <div style="display:flex;gap:8px;">
+            <button id="uni-btn-trigger" onclick="fireUniTrigger()" style="flex:1;padding:10px;background:#ef4444;color:white;border:none;border-radius:6px;font-weight:600;cursor:pointer;font-size:13px;">🚨 Fire Trigger</button>
+            <button id="uni-btn-confirm" onclick="confirmUniSafe()" style="flex:1;padding:10px;background:rgba(74,222,128,0.2);color:var(--accent-g);border:1px solid var(--accent-g);border-radius:6px;font-weight:600;cursor:pointer;font-size:13px;">✓ I'm Safe</button>
+          </div>
+          <div id="uni-trigger-state" style="margin-top:8px;font-size:11px;color:var(--text-dim);font-family:var(--mono);">Trigger state: idle</div>
+        </div>
+
+        <!-- Presets -->
+        <div style="margin-bottom:12px;">
+          <div class="geo-sub-title" style="border-top:none;padding-top:0;margin-top:0;color:#fbbf24;">Scenarios</div>
+          <div class="geo-presets">
+            <button class="geo-preset-btn active" onclick="applyUniPreset('all_normal')" style="border-color:rgba(251,191,36,0.3);">All Normal</button>
+            <button class="geo-preset-btn" onclick="applyUniPreset('mild_stress')" style="border-color:rgba(251,191,36,0.3);">Mild Stress</button>
+            <button class="geo-preset-btn" onclick="applyUniPreset('stress_geo')" style="border-color:rgba(251,191,36,0.3);">Stress + Geo</button>
+            <button class="geo-preset-btn" onclick="applyUniPreset('distress_alone')" style="border-color:rgba(251,191,36,0.3);">Distress Alone</button>
+            <button class="geo-preset-btn" onclick="applyUniPreset('night_attack')" style="border-color:rgba(251,191,36,0.3);">Night Attack</button>
+            <button class="geo-preset-btn" onclick="applyUniPreset('fall')" style="border-color:rgba(251,191,36,0.3);">Confirmed Fall</button>
+          </div>
+        </div>
+
+        <!-- Stage 1: Motion -->
+        <div class="geo-sub-title" style="color:var(--accent-b);">Stage 1 — Motion / Fall</div>
+        <div class="geo-toggle-grid">
+          <button class="geo-toggle-btn" id="uni-btn-motion" onclick="toggleUni('motion')" style="font-size:11px;">Abnormal Motion</button>
+          <button class="geo-toggle-btn" id="uni-btn-fall" onclick="toggleUni('fall')" style="font-size:11px;">Fall Confirmed</button>
+        </div>
+
+        <!-- Stage 2: Physio -->
+        <div class="geo-sub-title" style="color:var(--accent-g);">Stage 2 — Physiological</div>
+        <div class="sim-group">
+          <label>Physio State <span class="val" id="uni-lbl-physio">Normal</span></label>
+          <input type="range" id="uni-sl-physio" min="0" max="2" value="0" oninput="updateUniSim()">
+        </div>
+
+        <!-- Stage 3: Geo -->
+        <div class="geo-sub-title" style="color:var(--geo-accent);">Stage 3 — Geospatial (amplifier)</div>
+        <div class="sim-group">
+          <label>Geo Risk Score <span class="val" id="uni-lbl-geo">0.10</span></label>
+          <input type="range" id="uni-sl-geo" min="0" max="100" value="10" oninput="updateUniSim()">
+        </div>
+        <div class="geo-toggle-grid">
+          <button class="geo-toggle-btn" id="uni-btn-night" onclick="toggleUni('night')" style="font-size:11px;">🌙 Night</button>
+          <button class="geo-toggle-btn" id="uni-btn-unfam" onclick="toggleUni('unfam')" style="font-size:11px;">❓ Unfamiliar</button>
+        </div>
+
+        <!-- Stage 4: Audio (gated) -->
+        <div class="geo-sub-title" style="color:var(--audio-accent);">Stage 4 — Audio (gated)</div>
+        <div class="sim-group">
+          <label>Audio Risk <span class="val" id="uni-lbl-audio">0.00</span></label>
+          <input type="range" id="uni-sl-audio" min="0" max="100" value="0" oninput="updateUniSim()">
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;font-style:italic;">Audio only runs when Stage 1, 2, or 3 is abnormal — or when manual trigger is active.</div>
+      </div>
+
+      <!-- Result -->
+      <div class="geo-result" id="uni-result">
         <!-- populated by JS -->
       </div>
     </div>
@@ -3003,6 +3106,358 @@ function renderAudioResult(r) {
   `;
 }
 
+// ═══════════════════════════════════════════════════════════
+//  UNIFIED PIPELINE (JS port of unified_pipeline.py)
+//  Linear flow: motion → physiological → geospatial → audio
+// ═══════════════════════════════════════════════════════════
+
+const UNI_LEVELS = ['normal','low','moderate','high','critical'];
+const UNI_TIMEOUT_S = 30;
+const UNI_COOLDOWN_S = 300;
+
+let uniState = {
+  motion: false, fall: false,
+  physio: 0,                  // 0=normal, 1=stress, 2=distress
+  geo: 0.10, night: false, unfam: false,
+  audio: 0.00,
+  trigger: 'idle',            // idle | armed | escalated | cooldown
+  triggerFiredAt: null,
+  cooldownUntil: null,
+};
+
+const UNI_PRESETS = {
+  all_normal:     { motion:false, fall:false, physio:0, geo:0.10, night:false, unfam:false, audio:0.00 },
+  mild_stress:    { motion:false, fall:false, physio:1, geo:0.15, night:false, unfam:false, audio:0.10 },
+  stress_geo:     { motion:false, fall:false, physio:1, geo:0.55, night:true,  unfam:false, audio:0.20 },
+  distress_alone: { motion:false, fall:false, physio:2, geo:0.10, night:false, unfam:false, audio:0.10 },
+  night_attack:   { motion:true,  fall:false, physio:2, geo:0.85, night:true,  unfam:true,  audio:0.80 },
+  fall:           { motion:false, fall:true,  physio:0, geo:0.10, night:false, unfam:false, audio:0.10 },
+};
+
+function fireUniTrigger() {
+  uniState.trigger = 'armed';
+  uniState.triggerFiredAt = Date.now() / 1000;
+  uniState.cooldownUntil = null;
+  updateUniSim();
+}
+
+function confirmUniSafe() {
+  uniState.trigger = 'cooldown';
+  uniState.cooldownUntil = (Date.now() / 1000) + UNI_COOLDOWN_S;
+  uniState.triggerFiredAt = null;
+  updateUniSim();
+}
+
+function tickUniTrigger() {
+  const now = Date.now() / 1000;
+  if (uniState.trigger === 'cooldown' && uniState.cooldownUntil && now >= uniState.cooldownUntil) {
+    uniState.trigger = 'idle';
+    uniState.cooldownUntil = null;
+  }
+  if (uniState.trigger === 'armed' && uniState.triggerFiredAt &&
+      (now - uniState.triggerFiredAt) >= UNI_TIMEOUT_S) {
+    uniState.trigger = 'escalated';
+  }
+}
+
+function toggleUni(key) {
+  const map = { motion:'motion', fall:'fall', night:'night', unfam:'unfam' };
+  if (map[key] === undefined) return;
+  uniState[map[key]] = !uniState[map[key]];
+  const btn = document.getElementById(`uni-btn-${key}`);
+  if (btn) btn.classList.toggle('on');
+  updateUniSim();
+}
+
+function applyUniPreset(name) {
+  const p = UNI_PRESETS[name];
+  uniState.motion = p.motion;
+  uniState.fall   = p.fall;
+  uniState.physio = p.physio;
+  uniState.geo    = p.geo;
+  uniState.night  = p.night;
+  uniState.unfam  = p.unfam;
+  uniState.audio  = p.audio;
+
+  document.getElementById('uni-sl-physio').value = p.physio;
+  document.getElementById('uni-sl-geo').value = Math.round(p.geo * 100);
+  document.getElementById('uni-sl-audio').value = Math.round(p.audio * 100);
+
+  ['motion','fall','night','unfam'].forEach(k => {
+    const btn = document.getElementById(`uni-btn-${k}`);
+    if (btn) { p[k] ? btn.classList.add('on') : btn.classList.remove('on'); }
+  });
+
+  document.querySelectorAll('#unified-section .geo-preset-btn').forEach(b => b.classList.remove('active'));
+  if (event && event.target) event.target.classList.add('active');
+  updateUniSim();
+}
+
+function evaluateUni() {
+  tickUniTrigger();
+
+  // Read sliders into state
+  uniState.physio = +document.getElementById('uni-sl-physio').value;
+  uniState.geo    = +document.getElementById('uni-sl-geo').value / 100;
+  uniState.audio  = +document.getElementById('uni-sl-audio').value / 100;
+
+  const manualActive = (uniState.trigger === 'armed' || uniState.trigger === 'escalated');
+
+  // Stage 1 — Motion
+  const motion = {
+    abnormal: uniState.motion || uniState.fall,
+    fall:     uniState.fall,
+    summary:  uniState.fall ? 'FALL CONFIRMED' : (uniState.motion ? 'unusual motion' : 'still'),
+  };
+
+  // Stage 2 — Physio
+  const physioState = ['normal','stress','distress'][uniState.physio];
+  const physio = {
+    abnormal: uniState.physio >= 1,
+    state:    physioState,
+    summary:  physioState,
+  };
+
+  // Stage 3 — Geo (amplifier only)
+  const geoReasons = [];
+  if (uniState.night)  geoReasons.push('night');
+  if (uniState.unfam)  geoReasons.push('unfamiliar area');
+  const geo = {
+    abnormal:   false,
+    amplifies:  uniState.geo >= 0.40,
+    risk_score: uniState.geo,
+    reasoning:  geoReasons,
+    summary:    `geo=${uniState.geo.toFixed(2)} ${geoReasons.length ? '· '+geoReasons.join(' + ') : ''}`,
+  };
+
+  // Stage 4 — Audio (gated)
+  const audioGate = manualActive || motion.abnormal || physio.abnormal || geo.amplifies;
+  const audioRan  = audioGate && uniState.audio > 0.001;
+  const audio = audioRan ? {
+    abnormal: uniState.audio >= 0.25,
+    score:    uniState.audio,
+    summary:  `audio=${uniState.audio.toFixed(2)}`,
+    ran:      true,
+  } : {
+    abnormal: false, ran: false,
+    summary:  audioGate ? 'audio gated open (no signal)' : 'audio skipped (no abnormality)',
+  };
+
+  // Auto-escalate manual trigger if any abnormality
+  if (uniState.trigger === 'armed' && (motion.abnormal || physio.abnormal || audio.abnormal)) {
+    uniState.trigger = 'escalated';
+  }
+  const manualEscalated = (uniState.trigger === 'escalated');
+  const manualNow = (uniState.trigger === 'armed' || uniState.trigger === 'escalated');
+
+  // Compute abnormal stages
+  const abnormalStages = [];
+  if (motion.abnormal) abnormalStages.push('motion');
+  if (physio.abnormal) abnormalStages.push('physio');
+  if (audio.abnormal)  abnormalStages.push('audio');
+
+  // FUSION
+  let level, state, needsConf = false;
+  if (manualNow) {
+    if (manualEscalated || abnormalStages.length > 0) {
+      level = 'critical'; state = 'distress';
+    } else {
+      level = 'high'; state = 'stress'; needsConf = true;
+    }
+  } else if (motion.fall) {
+    level = 'critical'; state = 'distress';
+  } else if (physioState === 'distress' && audio.abnormal && geo.amplifies) {
+    level = 'critical'; state = 'distress';
+  } else if (physioState === 'distress') {
+    level = geo.amplifies ? 'critical' : 'high'; state = 'distress';
+  } else if (physioState === 'stress' && geo.amplifies && audio.abnormal) {
+    level = 'high'; state = 'distress';
+  } else if (physioState === 'stress' && geo.amplifies) {
+    level = 'moderate'; state = 'stress';
+  } else if (physioState === 'stress') {
+    level = 'low'; state = 'stress';
+  } else if (motion.abnormal) {
+    level = 'moderate'; state = 'stress';
+  } else {
+    level = 'normal'; state = 'normal';
+  }
+
+  // Message
+  const message = buildUniMessage(level, state, motion, physio, geo, audio, manualNow, needsConf);
+
+  // Reasoning chain
+  const reasoning = [];
+  if (manualNow) reasoning.push(`manual trigger: ${manualEscalated ? 'ESCALATED' : 'ARMED'}`);
+  reasoning.push(`Stage 1 (motion/fall): ${motion.summary}`);
+  reasoning.push(`Stage 2 (physio): ${physio.summary}`);
+  reasoning.push(`Stage 3 (geo): ${geo.summary}`);
+  reasoning.push(`Stage 4 (audio): ${audio.summary}`);
+
+  return {
+    level, state, message, needsConf, manualNow, manualEscalated,
+    abnormalStages, reasoning,
+    motion, physio, geo, audio,
+  };
+}
+
+function buildUniMessage(level, state, motion, physio, geo, audio, manual, needsConf) {
+  if (needsConf) {
+    return "You triggered an alert, but everything looks calm right now. Are you okay? Tap to confirm — we'll alert your trusted contacts in 30 seconds otherwise.";
+  }
+  const details = uniDetails(motion, physio, geo, audio);
+  if (manual && level === 'critical') {
+    return details
+      ? `Emergency triggered. We're seeing ${details}. Alerting your trusted contacts now.`
+      : "Emergency triggered. Alerting your trusted contacts now. Stay where you are if you can — help is on the way.";
+  }
+  if (level === 'critical') {
+    return `We're seriously concerned. ${details ? details.charAt(0).toUpperCase()+details.slice(1)+'.' : 'Multiple warning signs detected.'} If you can, please confirm you're safe. Otherwise we'll notify your emergency contact shortly.`;
+  }
+  if (level === 'high') {
+    return `Something seems wrong. ${details ? details.charAt(0).toUpperCase()+details.slice(1)+'.' : 'Your readings are concerning.'} If you feel unsafe, please move to a safe space or reach out to someone you trust.`;
+  }
+  if (level === 'moderate') {
+    return `Stay aware. ${details ? details.charAt(0).toUpperCase()+details.slice(1)+'.' : 'A few signs worth noting.'} If you feel uneasy, consider checking in with someone you trust.`;
+  }
+  if (level === 'low') {
+    return "Things look mostly fine, but we noticed a small change in your readings. We'll keep monitoring quietly — no action needed.";
+  }
+  return "Everything looks steady. You're doing great.";
+}
+
+function uniDetails(motion, physio, geo, audio) {
+  const parts = [];
+  if (physio.state === 'distress') parts.push('distress signs');
+  else if (physio.state === 'stress') parts.push('elevated stress');
+  if (motion.fall) parts.push('a possible fall');
+  else if (motion.abnormal) parts.push('unusual movement');
+  if (geo.amplifies && geo.reasoning.length) parts.push(geo.reasoning.join(' + '));
+  if (audio.abnormal) parts.push('concerning sounds');
+  return parts.join(', ');
+}
+
+function updateUniSim() {
+  // Update labels
+  const physioLbl = ['Normal','Stress','Distress'][+document.getElementById('uni-sl-physio').value];
+  document.getElementById('uni-lbl-physio').textContent = physioLbl;
+  document.getElementById('uni-lbl-geo').textContent = (+document.getElementById('uni-sl-geo').value / 100).toFixed(2);
+  document.getElementById('uni-lbl-audio').textContent = (+document.getElementById('uni-sl-audio').value / 100).toFixed(2);
+
+  const r = evaluateUni();
+  renderUniResult(r);
+}
+
+function renderUniResult(r) {
+  const colors = {
+    normal:'var(--risk-normal)', low:'var(--risk-low)',
+    moderate:'var(--risk-moderate)', high:'var(--risk-high)', critical:'var(--risk-critical)'
+  };
+  const labels = { normal:'Normal', low:'Low', moderate:'Moderate', high:'High', critical:'Critical' };
+  const col = colors[r.level];
+  const score = (UNI_LEVELS.indexOf(r.level)) / 4;
+  const circR = 26;
+  const circC = 2 * Math.PI * circR;
+  const circOffset = circC * (1 - score);
+
+  // Update trigger state display
+  const tsLabels = {
+    idle: 'idle (no manual trigger)',
+    armed: `ARMED — awaiting confirmation (${r.manualNow ? Math.max(0, Math.ceil(UNI_TIMEOUT_S - (Date.now()/1000 - uniState.triggerFiredAt))) : 0}s left)`,
+    escalated: 'ESCALATED — auto-promoted to critical',
+    cooldown: `cooldown (${Math.max(0, Math.ceil((uniState.cooldownUntil || 0) - Date.now()/1000))}s left)`,
+  };
+  document.getElementById('uni-trigger-state').textContent = `Trigger state: ${tsLabels[uniState.trigger]}`;
+
+  // Stage status badges
+  const stageBadges = [
+    { name:'Motion', abnormal: r.motion.abnormal, summary: r.motion.summary, color: 'var(--accent-b)' },
+    { name:'Physio', abnormal: r.physio.abnormal, summary: r.physio.summary, color: 'var(--accent-g)' },
+    { name:'Geo',    abnormal: r.geo.amplifies,   summary: r.geo.summary,    color: 'var(--geo-accent)', amp: true },
+    { name:'Audio',  abnormal: r.audio.abnormal,  summary: r.audio.summary,  color: 'var(--audio-accent)', ran: r.audio.ran },
+  ];
+
+  document.getElementById('uni-result').innerHTML = `
+    <div class="risk-header">
+      <div>
+        <span class="risk-badge ${r.level === 'critical' ? 'critical' : r.level === 'high' ? 'high_risk' : r.level === 'moderate' ? 'moderate_risk' : r.level === 'low' ? 'low_risk' : 'normal'}">${labels[r.level]}</span>
+        <span style="margin-left:10px;font-size:12px;color:var(--text-dim);">state: <strong style="color:${col}">${r.state.toUpperCase()}</strong></span>
+        ${r.manualNow ? `<span style="margin-left:8px;font-size:11px;padding:3px 8px;border-radius:6px;background:rgba(251,191,36,0.15);color:#fbbf24;font-weight:600;">MANUAL ${r.manualEscalated ? 'ESCALATED' : 'ARMED'}</span>` : ''}
+        ${r.needsConf ? '<span style="margin-left:8px;font-size:11px;padding:3px 8px;border-radius:6px;background:rgba(239,68,68,0.15);color:#ef4444;font-weight:600;">NEEDS CONFIRMATION</span>' : ''}
+      </div>
+      <div class="risk-score-ring">
+        <svg width="64" height="64">
+          <circle cx="32" cy="32" r="${circR}" fill="none" stroke="var(--border)" stroke-width="5"/>
+          <circle cx="32" cy="32" r="${circR}" fill="none" stroke="${col}" stroke-width="5"
+                  stroke-dasharray="${circC}" stroke-dashoffset="${circOffset}"
+                  stroke-linecap="round" style="transform:rotate(-90deg);transform-origin:center;"/>
+        </svg>
+        <span class="risk-score-text" style="color:${col}">${UNI_LEVELS.indexOf(r.level)+1}/5</span>
+      </div>
+    </div>
+
+    <div class="sim-alert" style="border-left:4px solid ${col};">
+      <div class="alert-severity ${r.level === 'critical' || r.level === 'high' ? 'high' : r.level === 'moderate' ? 'medium' : 'low'}">${r.level} priority · single output</div>
+      <div class="alert-title">${r.needsConf ? 'Are you okay?' : (r.level === 'normal' ? 'All clear' : 'Safety message')}</div>
+      <div class="alert-message">"${r.message}"</div>
+    </div>
+
+    <div class="sim-signals">
+      <h4>Stage Pipeline</h4>
+      ${stageBadges.map((s, i) => {
+        const stageLabel = s.amp ? (s.abnormal ? 'amplifies' : 'no amp') : s.ran === false ? 'skipped' : (s.abnormal ? 'ABNORMAL' : 'normal');
+        const dotColor = s.amp
+          ? (s.abnormal ? s.color : 'var(--text-muted)')
+          : (s.ran === false ? 'var(--text-muted)' : (s.abnormal ? 'var(--distress)' : 'var(--normal)'));
+        return `
+          <div class="signal-row">
+            <span class="sig-name" style="color:${s.color}">${i+1}. ${s.name}</span>
+            <div class="sig-bar">
+              <div class="sig-fill ${s.abnormal ? 'on' : 'off'}" style="width:${s.abnormal ? 100 : (s.ran === false ? 5 : 30)}%;background:${s.abnormal ? s.color : (s.ran === false ? 'var(--text-muted)' : 'var(--normal)')};"></div>
+            </div>
+            <span class="sig-val" style="color:${dotColor};font-size:11px;">${stageLabel}</span>
+            <span class="sig-flag">${s.abnormal ? '🚩' : s.ran === false ? '⊘' : '·'}</span>
+          </div>
+        `;
+      }).join('')}
+    </div>
+
+    <div class="risk-reasoning">
+      <h4>Reasoning Chain</h4>
+      ${r.reasoning.map((reason, i) => {
+        let dotColor = 'var(--text-muted)';
+        if (reason.includes('ESCALATED') || reason.includes('FALL') || reason.includes('distress')) dotColor = 'var(--risk-critical)';
+        else if (reason.includes('ARMED') || reason.includes('stress')) dotColor = 'var(--risk-high)';
+        else if (reason.includes('amplifies') || reason.includes('night') || reason.includes('unfamiliar')) dotColor = 'var(--geo-accent)';
+        else if (reason.includes('audio')) dotColor = 'var(--audio-accent)';
+        return `<div class="risk-reason-item"><span class="risk-reason-dot" style="background:${dotColor}"></span>${reason}</div>`;
+      }).join('')}
+    </div>
+
+    <div class="risk-action">
+      <strong>Single Output:</strong> level=<code>${r.level}</code> · state=<code>${r.state}</code> · stages_abnormal=[${r.abnormalStages.join(', ') || 'none'}] · audio_ran=<code>${r.audio.ran}</code>
+    </div>
+
+    <div class="risk-layers">
+      <div class="risk-layer-card">
+        <div class="rl-label">Context Level</div>
+        <div class="rl-value" style="color:${col}">${UNI_LEVELS.indexOf(r.level)+1}/5</div>
+      </div>
+      <div class="risk-layer-card">
+        <div class="rl-label">3-State</div>
+        <div class="rl-value" style="color:${r.state === 'distress' ? 'var(--distress)' : r.state === 'stress' ? 'var(--stress)' : 'var(--normal)'}">${r.state.toUpperCase()}</div>
+      </div>
+      <div class="risk-layer-card">
+        <div class="rl-label">Audio Ran</div>
+        <div class="rl-value" style="color:${r.audio.ran ? 'var(--audio-accent)' : 'var(--text-muted)'}">${r.audio.ran ? 'YES' : 'GATED'}</div>
+      </div>
+      <div class="risk-layer-card">
+        <div class="rl-label">Trigger</div>
+        <div class="rl-value" style="color:${uniState.trigger === 'idle' ? 'var(--text-muted)' : '#fbbf24'}">${uniState.trigger.toUpperCase()}</div>
+      </div>
+    </div>
+  `;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   populateScenarios();
   populateProfiles();
@@ -3011,6 +3466,11 @@ document.addEventListener('DOMContentLoaded', () => {
   updateSim();
   updateGeoSim();
   updateAudioSim();
+  updateUniSim();
+  // Tick the trigger state every second so countdowns update
+  setInterval(() => {
+    if (uniState.trigger !== 'idle') updateUniSim();
+  }, 1000);
 });
 </script>
 
